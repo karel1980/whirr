@@ -103,14 +103,12 @@ public class HadoopNameNodeClusterActionHandler extends HadoopClusterActionHandl
     // TODO: wait for TTs to come up (done in test for the moment)
     
     LOG.info("Completed configuration of {}", clusterSpec.getClusterName());
-    Instance instance = cluster.getInstanceMatching(role(ROLE));
-    InetAddress namenodePublicAddress = instance.getPublicAddress();
-    InetAddress jobtrackerPublicAddress = namenodePublicAddress;
+    InetAddress namenodePublicAddress = HadoopCluster.getNamenodePublicAddress(cluster);
+    InetAddress jobtrackerPublicAddress = HadoopCluster.getJobTrackerPublicAddress(cluster);
 
     LOG.info("Namenode web UI available at http://{}:{}",
       namenodePublicAddress.getHostName(), NAMENODE_WEB_UI_PORT);
-    LOG.info("Jobtracker web UI available at http://{}:{}",
-      jobtrackerPublicAddress.getHostName(), JOBTRACKER_WEB_UI_PORT);
+
     Properties config = createClientSideProperties(clusterSpec, namenodePublicAddress, jobtrackerPublicAddress);
     createClientSideHadoopSiteFile(clusterSpec, config);
     createProxyScript(clusterSpec, cluster);

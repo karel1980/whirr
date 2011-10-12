@@ -21,14 +21,20 @@ package org.apache.whirr.service.hadoop;
 import static org.apache.whirr.RolePredicates.role;
 
 import java.io.IOException;
+import java.net.InetAddress;
 
 import org.apache.whirr.Cluster;
 import org.apache.whirr.Cluster.Instance;
 import org.apache.whirr.service.ClusterActionEvent;
 import org.apache.whirr.service.FirewallManager.Rule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HadoopJobTrackerClusterActionHandler extends HadoopNameNodeClusterActionHandler {
 
+  private static final Logger LOG =
+      LoggerFactory.getLogger(HadoopNameNodeClusterActionHandler.class);
+    
   public static final String ROLE = "hadoop-jobtracker";
   
   @Override
@@ -51,6 +57,17 @@ public class HadoopJobTrackerClusterActionHandler extends HadoopNameNodeClusterA
           .ports(HadoopCluster.JOBTRACKER_PORT)
     );
     
+  }
+  
+  @Override
+  protected void afterConfigure(ClusterActionEvent event) throws IOException {
+    Cluster cluster = event.getCluster();
+    
+    InetAddress jobtrackerPublicAddress = HadoopCluster.getJobTrackerPublicAddress(cluster);
+
+    LOG.info("Jobtracker web UI available at http://{}:{}",
+      jobtrackerPublicAddress.getHostName(), JOBTRACKER_WEB_UI_PORT);
+
   }
   
 }
