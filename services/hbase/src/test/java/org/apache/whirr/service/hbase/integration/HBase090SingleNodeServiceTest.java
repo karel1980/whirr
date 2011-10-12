@@ -16,16 +16,14 @@
  * limitations under the License.
  */
 
-package org.apache.whirr.service.hadoop;
+package org.apache.whirr.service.hbase.integration;
 
+import org.junit.BeforeClass;
 
-public class HadoopTaskTrackerClusterActionHandler extends HadoopClusterActionHandler {
-
-  public static final String ROLE = "hadoop-tasktracker";
-  
-  @Override
-  public String getRole() {
-    return ROLE;
+public class HBase090SingleNodeServiceTest extends HBaseServiceTest {
+  @BeforeClass
+  public static void setUp() throws Exception {
+    controller = HBaseServiceController.getInstance("whirr-hbase-0.90-test.properties");
+    controller.ensureClusterRunning();
   }
-  
 }

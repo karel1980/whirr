@@ -41,6 +41,11 @@ function install_cdh_hadoop() {
   local OPTIND
   local OPTARG
 
+  if [ "$INSTALL_HADOOP_DONE" == "1" ]; then
+    echo "Hadoop is already installed."
+    return;
+  fi
+  
   CLOUD_PROVIDER=
   while getopts "c:" OPTION; do
     case $OPTION in
@@ -66,4 +71,6 @@ function install_cdh_hadoop() {
     cp -r /etc/$HADOOP/conf.empty $HADOOP_CONF_DIR
     alternatives --install /etc/$HADOOP/conf $HADOOP-conf $HADOOP_CONF_DIR 90
   fi
+  
+  HADOOP_INSTALL_DONE=1
 }

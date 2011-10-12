@@ -18,17 +18,17 @@
 
 package org.apache.whirr.service.hadoop;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
-
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.configuration.AbstractConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang.StringUtils;
+import org.apache.whirr.service.jclouds.CreateFileStatement;
 import org.jclouds.scriptbuilder.domain.Statement;
-import org.jclouds.scriptbuilder.domain.Statements;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 
 /**
  * Helper class to convert between Hadoop configuration representations.
