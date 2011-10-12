@@ -66,7 +66,7 @@ public class HadoopConfigurationConverter {
   
   public static Statement asCreateXmlConfigurationFileStatement(String path, 
       Configuration hadoopConfig) {
-    return Statements.appendFile(path, asXmlConfigurationLines(hadoopConfig));
+    return new CreateFileStatement(path, asXmlConfigurationLines(hadoopConfig));
   }
 
   @VisibleForTesting
@@ -93,7 +93,7 @@ public class HadoopConfigurationConverter {
   
   public static Statement asCreateEnvironmentVariablesFileStatement(String path, 
       Configuration config) {
-    return Statements.appendFile(path, asEnvironmentVariablesLines(config));
+    return new CreateFileStatement(path, asXmlConfigurationLines(config));
   }
   
 }
