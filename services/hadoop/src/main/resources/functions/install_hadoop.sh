@@ -31,13 +31,9 @@ function install_hadoop() {
     return;
   fi
   
-  CLOUD_PROVIDER=
   HADOOP_TAR_URL=
-  while getopts "c:u:" OPTION; do
+  while getopts "u:" OPTION; do
     case $OPTION in
-    c)
-      CLOUD_PROVIDER="$OPTARG"
-      ;;
     u)
       HADOOP_TAR_URL="$OPTARG"
       ;;

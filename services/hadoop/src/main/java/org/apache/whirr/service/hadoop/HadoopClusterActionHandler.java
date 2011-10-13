@@ -65,7 +65,7 @@ public abstract class HadoopClusterActionHandler extends ClusterActionHandlerSup
     ClusterSpec clusterSpec = event.getClusterSpec();
 
     Configuration conf = getConfiguration(clusterSpec);
-    addStatement(event, call("configure_hostnames", "-c", clusterSpec.getProvider()));
+    addStatement(event, call("configure_hostnames"));
 
     addStatement(event, call("install_java"));
     addStatement(event, call("install_tarball"));
@@ -74,7 +74,6 @@ public abstract class HadoopClusterActionHandler extends ClusterActionHandlerSup
         conf.getString("whirr.hadoop.tarball.url"));
 
     addStatement(event, call(getInstallFunction(conf),
-        "-c", clusterSpec.getProvider(),
         "-u", tarball));
   }
   

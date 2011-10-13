@@ -41,20 +41,6 @@ function install_cdh_hadoop() {
   local OPTIND
   local OPTARG
 
-  if [ "$INSTALL_HADOOP_DONE" == "1" ]; then
-    echo "Hadoop is already installed."
-    return;
-  fi
-  
-  CLOUD_PROVIDER=
-  while getopts "c:" OPTION; do
-    case $OPTION in
-    c)
-      CLOUD_PROVIDER="$OPTARG"
-      ;;
-    esac
-  done
-  
   REPO=${REPO:-cdh3}
   HADOOP=hadoop-${HADOOP_VERSION:-0.20}
   HADOOP_CONF_DIR=/etc/$HADOOP/conf.dist
