@@ -23,7 +23,7 @@ import org.junit.BeforeClass;
 public class HBase090SingleNodeServiceTest extends HBaseServiceTest {
   @BeforeClass
   public static void setUp() throws Exception {
-    controller = HBaseServiceController.getInstance("whirr-hbase-0.90-test.properties");
+    controller = HBaseServiceController.getInstance("whirr-hbase-0.90-singlenode-test.properties");
     controller.ensureClusterRunning();
   }
 }

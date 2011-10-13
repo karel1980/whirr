@@ -21,6 +21,7 @@ package org.apache.whirr.service.hadoop;
 import static org.apache.whirr.service.hadoop.HadoopConfigurationBuilder.buildCommon;
 import static org.apache.whirr.service.hadoop.HadoopConfigurationBuilder.buildHdfs;
 import static org.apache.whirr.service.hadoop.HadoopConfigurationBuilder.buildMapReduce;
+import static org.apache.whirr.service.hadoop.HadoopConfigurationBuilder.buildHadoopEnv;
 import static org.jclouds.scriptbuilder.domain.Statements.call;
 
 import com.google.common.base.Joiner;
@@ -40,7 +41,7 @@ public abstract class HadoopClusterActionHandler extends ClusterActionHandlerSup
 
   private static final Logger LOG =
       LoggerFactory.getLogger(HadoopClusterActionHandler.class);
-    
+
   /**
    * Returns a composite configuration that is made up from the global
    * configuration coming from the Whirr core with a hadoop defaults
@@ -71,7 +72,7 @@ public abstract class HadoopClusterActionHandler extends ClusterActionHandlerSup
 
     String tarball = prepareRemoteFileUrl(event,
         conf.getString("whirr.hadoop.tarball.url"));
-    
+
     addStatement(event, call(getInstallFunction(conf),
         "-c", clusterSpec.getProvider(),
         "-u", tarball));
@@ -102,7 +103,8 @@ public abstract class HadoopClusterActionHandler extends ClusterActionHandlerSup
       event.getStatementBuilder().addStatements(
         buildCommon("/tmp/core-site.xml", clusterSpec, cluster),
         buildHdfs("/tmp/hdfs-site.xml", clusterSpec, cluster),
-        buildMapReduce("/tmp/mapred-site.xml", clusterSpec, cluster)
+        buildMapReduce("/tmp/mapred-site.xml", clusterSpec, cluster),
+        buildHadoopEnv("/tmp/hadoop-env.sh", clusterSpec, cluster)
       );
     } catch (ConfigurationException e) {
       throw new IOException(e);

@@ -20,6 +20,9 @@ package org.apache.whirr.service.hadoop;
 
 import static org.apache.whirr.RolePredicates.role;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Iterables;
+
 import java.io.IOException;
 import java.util.Set;
 
@@ -33,9 +36,6 @@ import org.apache.whirr.ClusterSpec;
 import org.jclouds.compute.domain.Hardware;
 import org.jclouds.compute.domain.Processor;
 import org.jclouds.scriptbuilder.domain.Statement;
-
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Iterables;
 
 public class HadoopConfigurationBuilder {
   

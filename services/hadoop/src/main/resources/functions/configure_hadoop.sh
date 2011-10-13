@@ -17,15 +17,15 @@
 function configure_hadoop() {
   local OPTIND
   local OPTARG
- 
+
   if [ "$CONFIGURE_HADOOP_DONE" == "1" ]; then
     echo "Hadoop is already configured."
     return;
   fi
-  
+
   ROLES=$1
   shift
-  
+
   CLOUD_PROVIDER=
   while getopts "c:" OPTION; do
     case $OPTION in
