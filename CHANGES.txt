@@ -37,9 +37,20 @@ Trunk (unreleased changes)
     WHIRR-214. First iteration on refactoring the core to support the 
     addition of nodes to running clusters (asavu)
 
+    WHIRR-243. Allow to run component tests in memory 
+    (David Alves, Adrian Cole via asavu)
+
+    WHIRR-401. Use regular instances for testing on aws-ec2 (asavu)
+
+    WHIRR-397. Automatic template selection is too restrictive (asavu) 
+
+    WHIRR-342. hadoop/hbase configuration & active roles on a node (kve via asavu)
+
   BUG FIXES
 
     WHIRR-377. Fix broken CLI logging config. (asavu via tomwhite)
+
+    WHIRR-394. NPE used for flow control (David Alves via asavu)
 
 Release 0.6.0 - 2011-08-17
 
