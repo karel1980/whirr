@@ -2,6 +2,11 @@ Apache Whirr Change Log
 
 Trunk (unreleased changes)
 
+  NEW FEATURES
+
+    WHIRR-500. Let users control which hardware is used for each 
+    instance template (Karel Vervaeke via asavu)
+
   IMPROVEMENTS
 
     WHIRR-421. Handle more role / service lifecycle events as part 
@@ -36,6 +41,26 @@ Trunk (unreleased changes)
 
     WHIRR-493. Test override number of mappers for Hadoop (asavu)
 
+    WHIRR-454. Allow openjdk to be installed as an alternative 
+    to sun-java-6 (Karel Vervaeke via asavu)
+
+    WHIRR-439. Make proxy files executable (Marco Didonna via asavu)
+
+    WHIRR-498. Update the list of known limitations (asavu)
+
+    WHIRR-436. Allow Whirr to run from inside OSGi (Ioannis Canellos via asavu)
+
+    WHIRR-422. Integration tests should fail or succeed in a limited 
+    amount of time (asavu)
+
+    WHIRR-347. Support provider-independent environment variables for 
+    cloud credentials (asavu)
+
+    WHIRR-463. Fail fast when running as root (asavu)
+
+    WHIRR-35. Include .pac file for browsing to Hadoop clusters 
+    started on EC2 (asavu)
+
   BUG FIXES
 
     WHIRR-367. Wrong groupId for zookeeper (Joe Crobak via asavu)
@@ -47,6 +72,18 @@ Trunk (unreleased changes)
 
     WHIRR-490. hadoop-mapreduce.mapred.child.ulimit should be 
     unlimited by default (asavu)
+
+    WHIRR-495. bin/whirr is does not have executable permissions 
+    in the 0.7.0 pre-built download (asavu)
+
+    WHIRR-496. Documentation in 5-Minute guide is missing key 
+    option for destroy step (asavu)  
+
+    WHIRR-502. configure_cdh_hadoop.sh: syntax error trying to modify 
+    permissions on $HADOOP_LOG_DIR (asavu)
+
+    WHIRR-510. Get ZooKeeper ensemble with internal addresses 
+    (David Arthur via asavu)
 
 Release 0.7.0 - 2011-12-11
 
