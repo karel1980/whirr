@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.configuration.CompositeConfiguration;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.ConfigurationException;
@@ -43,7 +44,6 @@ import org.jclouds.predicates.validators.DnsNameValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -68,7 +68,7 @@ public class ClusterSpec {
     SERVICE_NAME(String.class, false, "(optional) The name of the " +
       "service to use. E.g. hadoop."),
 
-    LOGIN_USER(String.class, false,  "Override the default login user "+
+    BOOTSTRAP_USER(String.class, false,  "Override the default login user "+
       "used to bootstrap whirr. E.g. ubuntu or myuser:mypass."),
 
     CLUSTER_USER(String.class, false, "The name of the user that Whirr " +
@@ -141,7 +141,7 @@ public class ClusterSpec {
 
     HARDWARE_MIN_RAM(Integer.class, false, "The minimum amount of " +
       "instance memory. E.g. 1024"),
-      
+
     LOCATION_ID(String.class, false, "The location to launch " + 
       "instances in. If not specified then an arbitrary location " + 
       "will be chosen."),
@@ -158,7 +158,10 @@ public class ClusterSpec {
     VERSION(String.class, false, ""),
     
     RUN_URL_BASE(String.class, false, "The base URL for forming run " + 
-      "urls from. Change this to host your own set of launch scripts.");
+      "urls from. Change this to host your own set of launch scripts."),
+      
+    TERMINATE_ALL_ON_LAUNCH_FAILURE(Boolean.class, false, "Whether or not to " +
+      "automatically terminate all nodes when cluster launch fails for some reason.");
     
     private Class<?> type;
     private boolean multipleArguments;
@@ -236,7 +239,7 @@ public class ClusterSpec {
   private String serviceName;
 
   private String clusterUser;
-  private String loginUser;
+  private String bootstrapUser;
 
   private List<InstanceTemplate> instanceTemplates;
   private int maxStartupRetries;
@@ -273,6 +276,8 @@ public class ClusterSpec {
   
   private String version;
   private String runUrlBase;
+  
+  private boolean terminateAllOnLaunchFailure;
 
   private Configuration config;
   
@@ -299,7 +304,7 @@ public class ClusterSpec {
     setClusterName(getString(Property.CLUSTER_NAME));
     setServiceName(getString(Property.SERVICE_NAME));
 
-    setLoginUser(getString(Property.LOGIN_USER));
+    setBootstrapUser(getBootstrapUserOrDeprecatedLoginUser());
     setClusterUser(getString(Property.CLUSTER_USER));
 
     setInstanceTemplates(InstanceTemplate.parse(config));
@@ -330,10 +335,13 @@ public class ClusterSpec {
     setBlobStoreLocationId(getString(Property.BLOBSTORE_LOCATION_ID));
     setClientCidrs(getList(Property.CLIENT_CIDRS));
     
+    setTerminateAllOnLaunchFailure(config.getBoolean(
+        Property.TERMINATE_ALL_ON_LAUNCH_FAILURE.getConfigName(), Boolean.TRUE));
+    
     Map<String, List<String>> fr = new HashMap<String, List<String>>();
     String firewallPrefix = Property.FIREWALL_RULES.getConfigName();
     Pattern firewallRuleKeyPattern = Pattern.compile("^".concat(Pattern.quote(firewallPrefix).concat("(?:\\.(.+))?$")));
-    for (String key: Iterators.toArray(config.getKeys(), String.class)) {
+    for (String key: Iterators.<String>toArray(config.getKeys(), String.class)) {
       Matcher m = firewallRuleKeyPattern.matcher(key);
       if (!m.matches()) continue;
 
@@ -344,6 +352,15 @@ public class ClusterSpec {
     
     setVersion(getString(Property.VERSION));
     setRunUrlBase(getString(Property.RUN_URL_BASE));
+  }
+
+  private String getBootstrapUserOrDeprecatedLoginUser() {
+    final String loginUserConfig = "whirr.login-user";
+    if (config.containsKey(loginUserConfig)) {
+      LOG.warn("whirr.login-user is deprecated. Please rename to whirr.bootstrap-user.");
+      return config.getString(loginUserConfig, null);
+    }
+    return getString(Property.BOOTSTRAP_USER);
   }
 
   /**
@@ -357,7 +374,7 @@ public class ClusterSpec {
     r.setClusterName(getClusterName());
     r.setServiceName(getServiceName());
 
-    r.setLoginUser(getLoginUser());
+    r.setBootstrapUser(getBootstrapUser());
     r.setClusterUser(getClusterUser());
 
     r.setInstanceTemplates(Lists.newLinkedList(getInstanceTemplates()));
@@ -391,6 +408,8 @@ public class ClusterSpec {
 
     r.setVersion(getVersion());
     r.setRunUrlBase(getRunUrlBase());
+    
+    r.setTerminateAllOnLaunchFailure(isTerminateAllOnLaunchFailure());
 
     return r;
   }
@@ -482,6 +501,10 @@ public class ClusterSpec {
 
   public String getProvider() {
     return provider;
+  }
+
+  public boolean isStub() {
+    return "stub".equals(getProvider());
   }
 
   public String getIdentity() {
@@ -618,8 +641,13 @@ public class ClusterSpec {
     return clusterUser;
   }
 
+  public String getBootstrapUser() {
+    return bootstrapUser;
+  }
+
+  @Deprecated
   public String getLoginUser() {
-    return loginUser;
+    return getBootstrapUser();
   }
 
   public void setInstanceTemplates(List<InstanceTemplate> instanceTemplates) {
@@ -672,7 +700,7 @@ public class ClusterSpec {
 
   public void setStateStore(String type) {
     if (type != null) {
-      checkArgument(Sets.newHashSet("local", "blob", "none").contains(type),
+      checkArgument(Sets.newHashSet("local", "blob", "memory", "none").contains(type),
         "Invalid state store. Valid values are local, blob or none.");
     }
     this.stateStore = type;
@@ -703,6 +731,13 @@ public class ClusterSpec {
 
   public void setServiceName(String serviceName) {
     this.serviceName = serviceName;
+  }
+  
+  public boolean isTerminateAllOnLaunchFailure() {
+    return terminateAllOnLaunchFailure;
+  }
+  public void setTerminateAllOnLaunchFailure(boolean terminateAllOnLaunchFailure) {
+    this.terminateAllOnLaunchFailure = terminateAllOnLaunchFailure;
   }
 
   /**
@@ -802,12 +837,13 @@ public class ClusterSpec {
     this.clusterUser = user;
   }
 
+  public void setBootstrapUser(String bootstrapUser) {
+    this.bootstrapUser = bootstrapUser;
+  }
+
+  @Deprecated
   public void setLoginUser(String user) {
-    loginUser = config.getString(Property.LOGIN_USER.getConfigName());
-    if (loginUser != null) {
-      // patch until jclouds 1.0-beta-10
-      System.setProperty("whirr.login-user", loginUser);
-    }
+    setBootstrapUser(user);
   }
 
   public Configuration getConfiguration() {
@@ -840,8 +876,7 @@ public class ClusterSpec {
    * @return the directory for storing cluster-related files
    */
   public File getClusterDirectory() {
-    File clusterDir = new File(new File(System.getProperty("user.home")),
-        ".whirr");
+    File clusterDir = new File(new File(System.getProperty("user.home")), ".whirr");
     clusterDir = new File(clusterDir, getClusterName());
     clusterDir.mkdirs();
     return clusterDir;
@@ -862,7 +897,7 @@ public class ClusterSpec {
         && Objects.equal(getClusterName(), that.getClusterName())
         && Objects.equal(getServiceName(), that.getServiceName())
         && Objects.equal(getClusterUser(), that.getClusterUser())
-        && Objects.equal(getLoginUser(), that.getLoginUser())
+        && Objects.equal(getBootstrapUser(), that.getBootstrapUser())
         && Objects.equal(getPublicKey(), that.getPublicKey())
         && Objects.equal(getPrivateKey(), that.getPrivateKey())
         && Objects.equal(getImageId(), that.getImageId())
@@ -896,7 +931,7 @@ public class ClusterSpec {
         getClusterName(),
         getServiceName(),
         getClusterUser(),
-        getLoginUser(),
+        getBootstrapUser(),
         getPublicKey(),
         getPrivateKey(),
         getImageId(),
@@ -928,7 +963,7 @@ public class ClusterSpec {
       .add("clusterName", getClusterName())
       .add("serviceName", getServiceName())
       .add("clusterUser", getClusterUser())
-      .add("loginUser", getLoginUser())
+      .add("bootstrapUser", getBootstrapUser())
       .add("publicKey", getPublicKey())
       .add("privateKey", getPrivateKey())
       .add("imageId", getImageId())
@@ -943,6 +978,7 @@ public class ClusterSpec {
       .add("stateStoreContainer", getStateStoreContainer())
       .add("stateStoreBlob", getStateStoreBlob())
       .add("awsEc2SpotPrice", getAwsEc2SpotPrice())
+      .add("terminateAllOnLauchFailure",isTerminateAllOnLaunchFailure())
       .toString();
   }
 }

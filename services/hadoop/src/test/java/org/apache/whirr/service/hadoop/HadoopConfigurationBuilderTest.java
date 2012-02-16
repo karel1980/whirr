@@ -18,24 +18,18 @@
 
 package org.apache.whirr.service.hadoop;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterators;
 import com.google.common.collect.ImmutableSet.Builder;
-
-import java.util.List;
-
+import com.google.common.collect.Iterators;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.whirr.Cluster;
 import org.apache.whirr.Cluster.Instance;
 import org.apache.whirr.ClusterSpec;
+import org.apache.whirr.net.DnsResolver;
+import org.apache.whirr.net.FakeDnsResolver;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.jclouds.compute.domain.Hardware;
@@ -47,8 +41,15 @@ import org.jclouds.domain.Credentials;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 public class HadoopConfigurationBuilderTest {
-  
+
   static class RegexMatcher extends BaseMatcher<String> {
     private final String regex;
 
@@ -87,6 +88,8 @@ public class HadoopConfigurationBuilderTest {
   }
   
   private Cluster newCluster(int numberOfWorkers) {
+    DnsResolver fakeDnsResolver = new FakeDnsResolver();
+
     NodeMetadata node = mock(NodeMetadata.class);
     List<Processor> processors = ImmutableList.of(new Processor(4, 1.0));
     Hardware hardware = new HardwareImpl(null, null, "id", null, null,
@@ -98,14 +101,14 @@ public class HadoopConfigurationBuilderTest {
     Instance master = new Instance(new Credentials("", ""),
         ImmutableSet.of(HadoopNameNodeClusterActionHandler.ROLE,
             HadoopJobTrackerClusterActionHandler.ROLE),
-            "10.0.0.1", "10.0.0.1", "1", node);
+            "10.0.0.1", "10.0.0.1", "1", node, fakeDnsResolver);
     instances.add(master);
     for (int i = 0; i < numberOfWorkers; i++) {
       int id = i + 2;
       instances.add(new Instance(new Credentials("", ""),
         ImmutableSet.of(HadoopDataNodeClusterActionHandler.ROLE,
               HadoopTaskTrackerClusterActionHandler.ROLE),
-              "10.0.0." + id, "10.0.0." + id, id + "", node));
+              "10.0.0." + id, "10.0.0." + id, id + "", node, fakeDnsResolver));
     }
     return new Cluster(instances.build());
   }
@@ -154,6 +157,16 @@ public class HadoopConfigurationBuilderTest {
     assertThat(conf.getString("mapred.tasktracker.map.tasks.maximum"), is("4"));
     assertThat(conf.getString("mapred.tasktracker.reduce.tasks.maximum"), is("3"));
     assertThat(conf.getString("mapred.reduce.tasks"), is("15"));
+  }
+
+  @Test
+  public void testOverridesNumberOfMappers() throws Exception {
+    Configuration overrides = new PropertiesConfiguration();
+    overrides.addProperty("hadoop-mapreduce.mapred.tasktracker.map.tasks.maximum", "70");
+    clusterSpec = ClusterSpec.withNoDefaults(overrides);
+    Configuration conf = HadoopConfigurationBuilder.buildMapReduceConfiguration(
+        clusterSpec, cluster, defaults);
+    assertThat(conf.getString("mapred.tasktracker.map.tasks.maximum"), is("70"));
   }
   
   @Test

@@ -18,6 +18,7 @@
 
 package org.apache.whirr.command;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.List;
@@ -46,4 +47,5 @@ public abstract class Command {
   public abstract int run(InputStream in, PrintStream out, PrintStream err,
       List<String> args) throws Exception;
 
+  public abstract void printUsage(PrintStream stream) throws IOException;
 }

@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.List;
 
-import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 
 import org.apache.whirr.Cluster;
@@ -31,6 +30,7 @@ import org.apache.whirr.ClusterController;
 import org.apache.whirr.ClusterControllerFactory;
 import org.apache.whirr.ClusterSpec;
 import org.apache.whirr.command.AbstractClusterCommand;
+import org.apache.whirr.util.Utils;
 
 /**
  * A command to launch a new cluster.
@@ -49,10 +49,10 @@ public class LaunchClusterCommand extends AbstractClusterCommand {
   public int run(InputStream in, PrintStream out, PrintStream err,
       List<String> args) throws Exception {
     
-    OptionSet optionSet = parser.parse(args.toArray(new String[0]));
+    OptionSet optionSet = parser.parse(args.toArray(new String[args.size()]));
 
     if (!optionSet.nonOptionArguments().isEmpty()) {
-      printUsage(parser, err);
+      printUsage(err);
       return -1;
     }
     
@@ -63,17 +63,15 @@ public class LaunchClusterCommand extends AbstractClusterCommand {
       out.printf("Started cluster of %s instances\n",
           cluster.getInstances().size());
       out.println(cluster);
+      
+      // print ssh command. do it for the first 20 instances so that the console
+      // won't be overflooded when launching a 1000 node cluster
+      Utils.printAccess(out, clusterSpec, cluster, 20);
+      
       return 0;
     } catch (IllegalArgumentException e) {
-      err.println(e.getMessage());
-      printUsage(parser, err);
+      printErrorAndHelpHint(err, e);
       return -1;
     }
-  }
-
-  private void printUsage(OptionParser parser, PrintStream stream) throws IOException {
-    stream.println("Usage: whirr launch-cluster [OPTIONS]");
-    stream.println();
-    parser.printHelpOn(stream);
   }
 }

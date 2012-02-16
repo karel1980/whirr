@@ -45,12 +45,12 @@
     <breadcrumbs position="left">
       <item name="Apache" href="http://www.apache.org/" />
       <item name="Whirr" href="http://whirr.apache.org/"/>
-      <item name="0.6.0" href="http://whirr.apache.org/docs/0.6.0/"/>
+      <item name="0.7.0" href="http://whirr.apache.org/docs/0.7.0/"/>
     </breadcrumbs>
 
     <menu name="Whirr">
       <item name="About" href="http://whirr.apache.org/"/>
-      <item name="Download" href="http://www.apache.org/dyn/closer.cgi/incubator/whirr/"/>
+      <item name="Download" href="http://www.apache.org/dyn/closer.cgi/whirr/"/>
       <item name="Road Map" href="https://cwiki.apache.org/confluence/display/WHIRR/RoadMap" />
       <item name="Wiki" href="https://cwiki.apache.org/confluence/display/WHIRR" />
       <item name="FAQ" href="http://whirr.apache.org/faq.html"/>

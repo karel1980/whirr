@@ -26,20 +26,17 @@ import org.apache.whirr.Cluster;
 import org.apache.whirr.ClusterController;
 import org.apache.whirr.ClusterControllerFactory;
 import org.apache.whirr.ClusterSpec;
-import org.apache.whirr.cli.MemoryClusterStateStore;
-import org.apache.whirr.service.ClusterStateStore;
-import org.apache.whirr.service.ClusterStateStoreFactory;
+import org.apache.whirr.state.ClusterStateStore;
+import org.apache.whirr.state.ClusterStateStoreFactory;
+import org.apache.whirr.state.MemoryClusterStateStore;
 import org.apache.whirr.util.KeyPair;
 import org.jclouds.compute.domain.NodeMetadata;
 import org.jclouds.domain.Credentials;
 import org.jclouds.scriptbuilder.domain.Statement;
-import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.PrintStream;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,22 +50,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class RunScriptCommandTest {
-
-  private ByteArrayOutputStream outBytes;
-  private PrintStream out;
-
-  private ByteArrayOutputStream errBytes;
-  private PrintStream err;
-
-  @Before
-  public void setUp() {
-    outBytes = new ByteArrayOutputStream();
-    out = new PrintStream(outBytes);
-
-    errBytes = new ByteArrayOutputStream();
-    err = new PrintStream(errBytes);
-  }
+public class RunScriptCommandTest extends BaseCommandTest {
 
   @Test
   public void testScriptPathIsMandatory() throws Exception {
